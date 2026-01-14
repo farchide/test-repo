@@ -1,0 +1,43 @@
+# On-Premises Automation System Dependencies
+
+# Core dependencies
+pyyaml>=6.0
+aiohttp>=3.8.0
+
+# VMware automation
+pyvmomi>=8.0.0.1
+
+# Network automation
+netmiko>=4.1.0
+napalm>=4.0.0
+nornir>=3.3.0
+nornir-netmiko>=1.0.0
+nornir-napalm>=0.3.0
+
+# Server management
+paramiko>=3.0.0
+pywinrm>=0.4.3
+fabric>=3.0.0
+
+# Monitoring and metrics
+prometheus-client>=0.15.0
+influxdb-client>=1.35.0
+
+# CLI and utilities
+click>=8.1.0
+rich>=13.0.0
+tabulate>=0.9.0
+
+# API development (optional, for REST API)
+fastapi>=0.100.0
+uvicorn>=0.23.0
+
+# Testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+
+# Development
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.0.0

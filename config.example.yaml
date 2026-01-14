@@ -1,0 +1,82 @@
+# On-Premises Automation System Configuration
+# Copy this file to config.yaml and update with your settings
+
+# VMware vCenter Configuration
+vmware:
+  host: "vcenter.example.com"
+  username: "automation@vsphere.local"
+  password: ""  # Use environment variable VMWARE_PASSWORD instead
+  port: 443
+  verify_ssl: true
+  datacenter: "DC01"
+  cluster: "Production-Cluster"
+  datastore: "Production-Datastore-01"
+  template_folder: "Templates"
+
+# Network Device Configuration
+network:
+  switches:
+    - hostname: "core-sw-01"
+      ip: "10.0.0.1"
+      type: "cisco_ios"
+      username: "admin"
+    - hostname: "core-sw-02"
+      ip: "10.0.0.2"
+      type: "cisco_ios"
+      username: "admin"
+  firewalls:
+    - hostname: "fw-01"
+      ip: "10.0.0.10"
+      type: "cisco_asa"
+      username: "admin"
+  default_vlan_range:
+    - 100
+    - 4094
+  backup_before_change: true
+
+# Patching Configuration
+patching:
+  wsus_server: "wsus.example.com"
+  linux_repos:
+    - "https://repo.example.com/rhel8"
+    - "https://repo.example.com/rhel9"
+  maintenance_window_start: "02:00"
+  maintenance_window_end: "06:00"
+  reboot_timeout: 600
+  max_concurrent_patches: 5
+
+# Backup Validation Configuration
+backup:
+  backup_server: "veeam.example.com"
+  backup_type: "veeam"  # veeam, commvault, netbackup, cohesity, rubrik
+  validation_vm_prefix: "restore-test-"
+  retention_days: 30
+  test_frequency_days: 7
+
+# Capacity Management Configuration
+capacity:
+  storage_threshold_warning: 75
+  storage_threshold_critical: 90
+  compute_threshold_warning: 70
+  compute_threshold_critical: 85
+  forecast_days: 90
+  data_retention_days: 365
+
+# Incident Remediation Configuration
+remediation:
+  monitored_services:
+    - name: "web-service"
+      type: "http"
+      endpoint: "https://app.example.com/health"
+    - name: "database"
+      type: "tcp"
+      host: "db.example.com"
+      port: 5432
+    - name: "cache"
+      type: "tcp"
+      host: "redis.example.com"
+      port: 6379
+  max_restart_attempts: 3
+  restart_delay_seconds: 30
+  escalation_email: "oncall@example.com"
+  auto_remediate: true
