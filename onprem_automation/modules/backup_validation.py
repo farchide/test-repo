@@ -4,7 +4,7 @@ Automates backup verification, recovery testing, and compliance reporting.
 """
 
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
 import hashlib
@@ -67,7 +67,7 @@ class RecoveryTest:
     status: ValidationStatus
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    results: Dict = None
+    results: Dict[str, Any] = field(default_factory=dict)
 
 
 class VeeamClient:

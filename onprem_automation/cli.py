@@ -186,7 +186,7 @@ async def cmd_network_firewall(engine: AutomationEngine, args):
     params = {
         "device": args.device,
         "rule_name": args.name,
-        "action": args.rule_action,
+        "rule_action": args.rule_action,
         "source": args.source,
         "destination": args.destination,
         "protocol": args.protocol,

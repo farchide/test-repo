@@ -154,7 +154,7 @@ class CapacityForecaster:
         self,
         metrics: List[CapacityMetric],
         forecast_days: int = 90
-    ) -> CapacityForecast:
+    ) -> Optional[CapacityForecast]:
         """
         Simple linear regression forecast.
         Good for steady, predictable growth patterns.

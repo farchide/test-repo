@@ -4,7 +4,7 @@ Automates patching workflows for Windows, Linux servers, and network devices.
 """
 
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
 import asyncio
@@ -60,7 +60,7 @@ class PatchJob:
     status: PatchStatus
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    patches_installed: List[str] = None
+    patches_installed: List[str] = field(default_factory=list)
     reboot_performed: bool = False
     error_message: Optional[str] = None
 
