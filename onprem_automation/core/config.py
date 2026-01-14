@@ -75,6 +75,47 @@ class RemediationConfig:
     auto_remediate: bool = True
 
 
+@dataclass
+class ServiceNowConfig:
+    """ServiceNow integration configuration."""
+    instance: str = ""  # e.g., 'dev12345' for dev12345.service-now.com
+    username: str = ""
+    password: str = ""
+    enabled: bool = False
+    default_assignment_group: str = ""
+    auto_create_incidents: bool = False
+
+
+@dataclass
+class JiraConfig:
+    """Jira integration configuration."""
+    url: str = ""  # e.g., 'https://yourcompany.atlassian.net'
+    username: str = ""  # Email for Cloud
+    api_token: str = ""
+    enabled: bool = False
+    is_cloud: bool = True
+    default_project: str = ""
+
+
+@dataclass
+class PagerDutyConfig:
+    """PagerDuty integration configuration."""
+    api_key: str = ""
+    integration_key: str = ""  # For events API
+    enabled: bool = False
+    region: str = "us"  # 'us' or 'eu'
+    default_service_id: str = ""
+
+
+@dataclass
+class MetricsConfig:
+    """Prometheus metrics configuration."""
+    enabled: bool = True
+    port: int = 9090
+    address: str = ""  # Empty for all interfaces
+    prefix: str = "onprem_automation"
+
+
 class Config:
     """Main configuration class that loads and manages all settings."""
 
@@ -89,6 +130,14 @@ class Config:
         self.backup = BackupConfig()
         self.capacity = CapacityConfig()
         self.remediation = RemediationConfig()
+
+        # ITSM integrations
+        self.servicenow = ServiceNowConfig()
+        self.jira = JiraConfig()
+        self.pagerduty = PagerDutyConfig()
+
+        # Metrics
+        self.metrics = MetricsConfig()
 
         if self.config_path and Path(self.config_path).exists():
             self.load()
@@ -137,6 +186,20 @@ class Config:
         if 'remediation' in self._raw_config:
             self.remediation = RemediationConfig(**self._raw_config['remediation'])
 
+        # ITSM integrations
+        if 'servicenow' in self._raw_config:
+            self.servicenow = ServiceNowConfig(**self._raw_config['servicenow'])
+
+        if 'jira' in self._raw_config:
+            self.jira = JiraConfig(**self._raw_config['jira'])
+
+        if 'pagerduty' in self._raw_config:
+            self.pagerduty = PagerDutyConfig(**self._raw_config['pagerduty'])
+
+        # Metrics
+        if 'metrics' in self._raw_config:
+            self.metrics = MetricsConfig(**self._raw_config['metrics'])
+
     def save(self, path: Optional[str] = None) -> None:
         """Save current configuration to YAML file."""
         save_path = path or self.config_path
@@ -150,6 +213,10 @@ class Config:
             'backup': self.backup.__dict__,
             'capacity': self.capacity.__dict__,
             'remediation': self.remediation.__dict__,
+            'servicenow': self.servicenow.__dict__,
+            'jira': self.jira.__dict__,
+            'pagerduty': self.pagerduty.__dict__,
+            'metrics': self.metrics.__dict__,
         }
 
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)

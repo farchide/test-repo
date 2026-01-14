@@ -80,3 +80,52 @@ remediation:
   restart_delay_seconds: 30
   escalation_email: "oncall@example.com"
   auto_remediate: true
+
+# ServiceNow Integration
+servicenow:
+  enabled: false
+  instance: "your-instance"  # e.g., "dev12345" for dev12345.service-now.com
+  username: "integration_user"
+  password: ""  # Use environment variable SERVICENOW_PASSWORD
+  default_assignment_group: "Infrastructure Team"
+  auto_create_incidents: true
+  incident_caller_id: ""  # sys_id of default caller
+  timeout: 30
+
+# Jira Integration
+jira:
+  enabled: false
+  url: "https://your-org.atlassian.net"  # or on-prem URL
+  username: "automation@example.com"
+  api_token: ""  # Use environment variable JIRA_API_TOKEN
+  is_cloud: true  # Set to false for Jira Server/Data Center
+  default_project: "OPS"
+  default_issue_type: "Task"
+  timeout: 30
+
+# PagerDuty Integration
+pagerduty:
+  enabled: false
+  api_key: ""  # REST API key - Use environment variable PAGERDUTY_API_KEY
+  integration_key: ""  # Events API integration key for triggering alerts
+  region: "us"  # "us" or "eu"
+  default_service_id: ""  # Service ID for incident creation
+  auto_resolve_on_recovery: true
+  timeout: 30
+
+# Metrics Configuration (Prometheus)
+metrics:
+  enabled: true
+  port: 9090
+  address: "0.0.0.0"  # Listen address for metrics endpoint
+  prefix: "onprem_automation"  # Metric name prefix
+  include_host_label: true
+  histogram_buckets:  # Duration histogram buckets in seconds
+    - 0.1
+    - 0.5
+    - 1.0
+    - 5.0
+    - 10.0
+    - 30.0
+    - 60.0
+    - 300.0
