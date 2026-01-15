@@ -1,54 +1,76 @@
-# On-Premises Automation System
+# On-Premises Automation Platform
 
-A comprehensive Python framework for automating on-premises infrastructure operations including VM provisioning, network configuration, patching, backup validation, capacity management, and incident remediation.
+A comprehensive enterprise-grade Python framework for automating on-premises infrastructure operations. Comparable to Ansible Tower, Rundeck, and StackStorm.
 
-## Features
+## Key Features
 
-### 1. VMware VM Provisioning
-- Automated VM creation from templates
-- VM cloning and lifecycle management
-- Snapshot management
-- Hardware reconfiguration (CPU, memory, disk)
-- PowerCLI integration for bulk operations
+### Core Automation Modules
+- **VMware VM Provisioning** - Automated VM creation, cloning, snapshots, lifecycle management
+- **Network Automation** - VLAN management, firewall rules, multi-vendor support (Cisco, Juniper, Palo Alto, Fortinet)
+- **Automated Patching** - Windows/Linux patching, maintenance windows, rollback capability
+- **Backup Validation** - Automated recovery testing, compliance reporting, multi-vendor support
+- **Capacity Management** - Real-time monitoring, forecasting, rightsizing recommendations
+- **Incident Remediation** - Auto-remediation, service failover, runbook execution
 
-### 2. Network Automation
-- VLAN creation and management
-- Firewall rule configuration
-- Interface configuration
-- Static routing
-- Configuration backup and restore
-- Multi-vendor support (Cisco, Juniper, Palo Alto, Fortinet)
+### Enterprise Platform Features
 
-### 3. Automated Patching
-- Windows patching via WSUS/Windows Update
-- Linux patching (RHEL, CentOS, Ubuntu, SUSE)
-- Network device firmware updates
-- Maintenance window scheduling
-- Pre-patch snapshots and rollback capability
+| Feature | Description |
+|---------|-------------|
+| **REST API** | FastAPI-based API with OpenAPI/Swagger documentation |
+| **Database Layer** | SQLAlchemy ORM with PostgreSQL/SQLite support |
+| **Workflow Engine** | YAML-based DSL with parallel execution, conditions, loops |
+| **Plugin System** | Hot-loadable plugins with dependency resolution |
+| **Event Bus** | Pub/sub messaging with async processing |
+| **Secret Management** | HashiCorp Vault, AWS Secrets Manager, Azure Key Vault |
+| **Job Scheduling** | Cron, interval, and one-time job scheduling |
+| **ChatOps** | Slack, Microsoft Teams, Discord integrations |
+| **ITSM Integration** | ServiceNow, Jira, PagerDuty connectors |
+| **Metrics & Monitoring** | Prometheus-compatible metrics export |
 
-### 4. Backup Validation
-- Automated recovery testing (SureBackup-style)
-- Instant VM recovery validation
-- File-level recovery testing
-- Backup chain verification
-- Compliance reporting
-- Multi-vendor support (Veeam, Commvault, NetBackup)
+## Architecture
 
-### 5. Capacity Management
-- Real-time capacity monitoring
-- Storage and compute forecasting
-- Threshold alerting
-- VM rightsizing recommendations
-- Orphaned resource identification
-- Capacity reports and trends
-
-### 6. Incident Remediation
-- Automated service restarts
-- VM restart and recovery
-- Service failover
-- Traffic rerouting
-- Runbook execution
-- Incident tracking and escalation
+```
+onprem_automation/
+├── core/                    # Core engine, config, logging
+├── modules/                 # Automation modules (VMware, Network, etc.)
+├── connectors/              # Infrastructure connectors
+│   ├── vmware_connector.py
+│   ├── network_connector.py
+│   ├── server_connector.py
+│   └── backup_connectors.py
+├── integrations/            # ITSM integrations
+│   ├── servicenow.py
+│   ├── jira.py
+│   └── pagerduty.py
+├── api/                     # REST API (FastAPI)
+│   ├── main.py
+│   └── auth.py
+├── database/                # SQLAlchemy models
+│   ├── models.py
+│   └── session.py
+├── workflows/               # Workflow engine
+│   ├── dsl.py
+│   └── engine.py
+├── plugins/                 # Plugin system
+│   ├── base.py
+│   └── manager.py
+├── events/                  # Event bus
+│   ├── bus.py
+│   ├── types.py
+│   └── handlers.py
+├── secrets/                 # Secret management
+│   ├── manager.py
+│   └── providers.py
+├── scheduler/               # Job scheduling
+│   ├── scheduler.py
+│   └── job.py
+├── chatops/                 # Chat integrations
+│   ├── slack.py
+│   ├── teams.py
+│   └── discord_bot.py
+├── metrics/                 # Prometheus metrics
+└── cli.py                   # Command-line interface
+```
 
 ## Installation
 
@@ -60,39 +82,31 @@ cd onprem-automation
 # Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# or
-.\venv\Scripts\activate  # Windows
 
-# Install dependencies
+# Basic installation
 pip install -e .
 
-# For full installation with all optional dependencies
+# Full installation with all optional dependencies
 pip install -e ".[full,api,dev]"
 ```
 
-## Configuration
+### Optional Dependencies
 
-1. Copy the example configuration:
 ```bash
-cp config.example.yaml config.yaml
+# For REST API
+pip install fastapi uvicorn python-jose
+
+# For database
+pip install sqlalchemy psycopg2-binary
+
+# For ChatOps
+pip install slack-sdk botbuilder-core discord.py
+
+# For secret management
+pip install hvac boto3 azure-keyvault-secrets
 ```
 
-2. Edit `config.yaml` with your environment settings:
-```yaml
-vmware:
-  host: "vcenter.example.com"
-  username: "automation@vsphere.local"
-  datacenter: "DC01"
-  cluster: "Production-Cluster"
-```
-
-3. Set sensitive credentials via environment variables:
-```bash
-export VMWARE_PASSWORD="your-password"
-export NETWORK_PASSWORD="your-password"
-```
-
-## Usage
+## Quick Start
 
 ### CLI Usage
 
@@ -104,231 +118,467 @@ onprem-auto list
 onprem-auto health
 
 # VMware operations
-onprem-auto vmware provision my-new-vm -t rhel8-template --cpus 4 --memory 8
+onprem-auto vmware provision my-vm -t rhel8-template --cpus 4 --memory 8
 onprem-auto vmware list --templates
 
 # Network operations
-onprem-auto network vlan core-sw-01 100 -n "Production" -d "Production VLAN"
-onprem-auto network firewall fw-01 -n "Allow-Web" -a permit -s 10.0.0.0/8 -d any -p tcp --port 443
+onprem-auto network vlan switch01 100 -n "Production"
+onprem-auto network firewall fw-01 -n "Allow-HTTPS" -a permit -p tcp --port 443
 
 # Patching
 onprem-auto patch scan server01.example.com
 onprem-auto patch install server01.example.com
-onprem-auto patch server server01.example.com  # Full workflow
 
 # Backup validation
 onprem-auto backup status -j "Production-VMs-Daily"
-onprem-auto backup test my-critical-vm -t application_test
-onprem-auto backup compliance
+onprem-auto backup test my-vm -t application_test
 
 # Capacity management
 onprem-auto capacity status -t storage
-onprem-auto capacity forecast "Production-Datastore-01" --days 90
-onprem-auto capacity report -t detailed
+onprem-auto capacity forecast "Datastore-01" --days 90
 
 # Incident remediation
-onprem-auto remediate restart server01.example.com httpd
-onprem-auto remediate failover web-service --primary server01 --secondary server02
-onprem-auto remediate incidents --status open
+onprem-auto remediate restart server01 httpd
+onprem-auto remediate failover web-service --primary srv01 --secondary srv02
 ```
 
-### Generic Action Execution
+### REST API
 
 ```bash
-# Run any module action with parameters
-onprem-auto run vmware provision_vm name=test-vm template=rhel8-template num_cpus=4
-onprem-auto run network create_vlan device=switch01 vlan_id=200 name=Development
-onprem-auto run capacity get_recommendations
+# Start the API server
+uvicorn onprem_automation.api.main:app --host 0.0.0.0 --port 8000
+
+# API endpoints available at http://localhost:8000/docs
 ```
 
-### Workflow Execution
+**Example API calls:**
 
-Create a workflow file (workflow.json):
-```json
-[
-  {
-    "module": "vmware",
-    "action": "provision_vm",
-    "params": {
-      "name": "app-server-01",
-      "template": "rhel8-template",
-      "num_cpus": 4,
-      "memory_gb": 8
-    }
-  },
-  {
-    "module": "network",
-    "action": "configure_interface",
-    "params": {
-      "device": "switch01",
-      "interface": "Gi1/0/24",
-      "vlan": 100
-    }
-  },
-  {
-    "module": "patching",
-    "action": "patch_server",
-    "params": {
-      "hostname": "app-server-01"
-    }
-  }
-]
-```
-
-Run the workflow:
 ```bash
-onprem-auto workflow workflow.json
+# Get auth token
+curl -X POST "http://localhost:8000/api/v1/auth/token" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "password"}'
+
+# List jobs
+curl -X GET "http://localhost:8000/api/v1/jobs" \
+  -H "Authorization: Bearer <token>"
+
+# Execute a job
+curl -X POST "http://localhost:8000/api/v1/jobs/job-id/execute" \
+  -H "Authorization: Bearer <token>"
+
+# Get workflow status
+curl -X GET "http://localhost:8000/api/v1/workflows/workflow-id" \
+  -H "Authorization: Bearer <token>"
 ```
 
-### Python API Usage
+### Python API
 
 ```python
 import asyncio
-from onprem_automation import AutomationEngine, Config
-from onprem_automation.modules import (
-    VMwareProvisioningModule,
-    NetworkAutomationModule,
-    PatchingModule,
-)
+from onprem_automation.core import Config
+from onprem_automation.core.engine import AutomationEngine
+from onprem_automation.modules import VMwareProvisioningModule, NetworkAutomationModule
 
 async def main():
-    # Initialize engine
     config = Config("config.yaml")
     engine = AutomationEngine(config)
 
-    # Register modules
     engine.register_module(VMwareProvisioningModule)
     engine.register_module(NetworkAutomationModule)
-    engine.register_module(PatchingModule)
 
     # Provision a VM
     result = await engine.run_action(
-        module_name="vmware",
-        action="provision_vm",
-        name="new-server",
+        "vmware", "provision_vm",
+        name="app-server",
         template="rhel8-template",
-        num_cpus=4,
-        memory_gb=8
-    )
-    print(result)
-
-    # Create a VLAN
-    result = await engine.run_action(
-        module_name="network",
-        action="create_vlan",
-        device="core-switch-01",
-        vlan_id=150,
-        name="Application"
-    )
-    print(result)
-
-    # Run capacity forecast
-    result = await engine.run_action(
-        module_name="capacity",
-        action="forecast_capacity",
-        resource_name="Production-Datastore-01",
-        forecast_days=90
+        num_cpus=4, memory_gb=8
     )
     print(result)
 
 asyncio.run(main())
 ```
 
-## Architecture
+## Workflow Engine
 
+Create workflows using YAML DSL:
+
+```yaml
+name: deploy-application
+version: "1.0"
+description: Deploy application to production
+
+inputs:
+  - name: app_name
+    type: string
+    required: true
+  - name: environment
+    type: string
+    default: production
+
+steps:
+  - name: provision-vm
+    type: action
+    module: vmware
+    action: provision_vm
+    params:
+      name: "{{ inputs.app_name }}-server"
+      template: rhel8-template
+      num_cpus: 4
+
+  - name: configure-network
+    type: action
+    module: network
+    action: configure_interface
+    params:
+      device: switch01
+      vlan: 100
+    depends_on: [provision-vm]
+
+  - name: approval-gate
+    type: approval
+    approvers: [ops-team]
+    timeout: 3600
+    depends_on: [configure-network]
+
+  - name: deploy-parallel
+    type: parallel
+    depends_on: [approval-gate]
+    steps:
+      - name: install-packages
+        type: action
+        module: patching
+        action: install_updates
+      - name: configure-backup
+        type: action
+        module: backup
+        action: create_backup_job
+
+outputs:
+  - name: server_ip
+    value: "{{ steps.provision-vm.result.ip_address }}"
 ```
-onprem_automation/
-├── __init__.py
-├── cli.py                    # Command-line interface
-├── core/
-│   ├── __init__.py
-│   ├── config.py            # Configuration management
-│   ├── engine.py            # Core automation engine
-│   └── logger.py            # Logging utilities
-└── modules/
-    ├── __init__.py
-    ├── vmware_provisioning.py    # VMware automation
-    ├── network_automation.py     # Network device automation
-    ├── patching.py               # Server patching
-    ├── backup_validation.py      # Backup testing
-    ├── capacity_management.py    # Capacity forecasting
-    └── incident_remediation.py   # Incident response
+
+Execute workflows:
+
+```python
+from onprem_automation.workflows import WorkflowEngine, WorkflowDSL
+
+# Load and execute workflow
+workflow = WorkflowDSL.parse("deploy.yaml")
+engine = WorkflowEngine()
+result = await engine.execute(workflow, inputs={"app_name": "myapp"})
+```
+
+## Plugin System
+
+Create custom plugins:
+
+```python
+from onprem_automation.plugins import PluginBase, PluginMetadata, PluginType
+
+class MyCustomPlugin(PluginBase):
+    metadata = PluginMetadata(
+        name="my-plugin",
+        version="1.0.0",
+        description="Custom automation plugin",
+        plugin_type=PluginType.MODULE
+    )
+
+    def initialize(self, config):
+        self.config = config
+        return True
+
+    async def execute(self, action, **params):
+        if action == "custom_action":
+            return await self.custom_action(**params)
+
+    async def custom_action(self, **params):
+        # Implementation
+        return {"status": "success"}
+```
+
+Load plugins:
+
+```python
+from onprem_automation.plugins import get_plugin_manager
+
+manager = get_plugin_manager()
+manager.add_plugin_directory("/path/to/plugins")
+manager.load_all()
+
+# Get and use plugin
+plugin = manager.get_plugin("my-plugin")
+result = await plugin.instance.execute("custom_action", param1="value")
+```
+
+## Event-Driven Architecture
+
+Subscribe to events:
+
+```python
+from onprem_automation.events import get_event_bus, Event, EventType, event_handler
+
+bus = get_event_bus()
+
+@event_handler(EventType.JOB_COMPLETED, EventType.JOB_FAILED)
+async def on_job_finish(event: Event):
+    print(f"Job {event.data['job_id']} finished: {event.event_type}")
+
+bus.subscribe("my-handler", on_job_finish)
+await bus.start()
+
+# Publish events
+await bus.publish(Event(
+    event_type=EventType.JOB_COMPLETED,
+    source="job_executor",
+    data={"job_id": "123", "status": "success"}
+))
+```
+
+## Secret Management
+
+```python
+from onprem_automation.secrets import get_secret_manager, VaultProvider
+
+manager = get_secret_manager()
+
+# Add HashiCorp Vault provider
+manager.add_provider("vault", VaultProvider(
+    url="https://vault.example.com",
+    token="my-token"
+))
+
+await manager.connect_all()
+
+# Get secrets
+db_password = await manager.get_secret("vault://database/credentials#password")
+
+# Resolve secrets in config
+config = await manager.resolve_secrets({
+    "database": {
+        "password": "${vault://database/credentials#password}"
+    }
+})
+```
+
+## Job Scheduling
+
+```python
+from onprem_automation.scheduler import get_scheduler, ScheduledJob, CronTrigger
+
+scheduler = get_scheduler()
+
+# Register job handlers
+scheduler.register_handler("backup", "run_backup", backup_handler)
+
+# Schedule jobs
+scheduler.add_job(ScheduledJob(
+    name="nightly-backup",
+    trigger=CronTrigger("0 2 * * *"),  # 2 AM daily
+    action="run_backup",
+    module="backup",
+    params={"target": "all"}
+))
+
+await scheduler.start()
+```
+
+## ChatOps Integration
+
+### Slack
+
+```python
+from onprem_automation.chatops import SlackBot, SlackConfig
+
+config = SlackConfig(
+    bot_token="xoxb-...",
+    app_token="xapp-...",
+    notification_channel="#ops"
+)
+
+bot = SlackBot(config)
+
+@bot.handler.command("deploy", permission=PermissionLevel.OPERATOR)
+async def deploy_cmd(ctx):
+    env = ctx.args[0] if ctx.args else "staging"
+    return f"Deploying to {env}..."
+
+await bot.connect()
+```
+
+### Microsoft Teams
+
+```python
+from onprem_automation.chatops import TeamsBot, TeamsConfig
+
+config = TeamsConfig(
+    app_id="...",
+    app_password="...",
+    tenant_id="..."
+)
+
+bot = TeamsBot(config)
+await bot.start_server(port=3978)
+```
+
+## ITSM Integrations
+
+### ServiceNow
+
+```python
+from onprem_automation.integrations import ServiceNowConfig, ServiceNowClient
+
+config = ServiceNowConfig(
+    instance="company.service-now.com",
+    username="integration_user",
+    password="password"
+)
+
+client = ServiceNowClient(config)
+
+# Create incident
+incident = await client.create_incident(
+    short_description="Server disk full",
+    description="Production server /var partition at 95%",
+    urgency=2,
+    impact=2
+)
+```
+
+### PagerDuty
+
+```python
+from onprem_automation.integrations import PagerDutyConfig, PagerDutyClient
+
+config = PagerDutyConfig(
+    api_key="your-api-key",
+    integration_key="your-integration-key"
+)
+
+client = PagerDutyClient(config)
+
+# Trigger alert
+await client.trigger_event(
+    summary="High CPU usage on prod-web-01",
+    severity="warning",
+    source="monitoring"
+)
+```
+
+## Configuration
+
+```yaml
+# config.yaml
+vmware:
+  host: "vcenter.example.com"
+  username: "automation@vsphere.local"
+  datacenter: "DC01"
+  cluster: "Production"
+
+network:
+  devices:
+    core-switch:
+      host: "10.0.0.1"
+      device_type: "cisco_ios"
+
+patching:
+  wsus_server: "wsus.example.com"
+  maintenance_window:
+    start: "02:00"
+    duration_hours: 4
+
+backup:
+  provider: "veeam"
+  server: "veeam.example.com"
+
+capacity:
+  thresholds:
+    storage_warning: 75
+    storage_critical: 90
+
+# Secrets via environment variables
+# VMWARE_PASSWORD, SERVICENOW_PASSWORD, etc.
+```
+
+## Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=onprem_automation
+
+# Run specific test file
+pytest tests/test_modules.py -v
 ```
 
 ## Module Actions Reference
 
-### VMware Module (`vmware`)
+### VMware Module
 | Action | Description |
 |--------|-------------|
 | `provision_vm` | Create VM from template |
 | `clone_vm` | Clone existing VM |
 | `delete_vm` | Delete a VM |
-| `power_on` | Power on VM |
-| `power_off` | Power off VM |
+| `power_on/off` | Power operations |
 | `snapshot` | Create snapshot |
-| `reconfigure` | Modify VM hardware |
-| `list_templates` | List available templates |
-| `list_vms` | List virtual machines |
+| `list_templates` | List templates |
 
-### Network Module (`network`)
+### Network Module
 | Action | Description |
 |--------|-------------|
 | `create_vlan` | Create VLAN |
-| `delete_vlan` | Delete VLAN |
-| `list_vlans` | List VLANs |
 | `add_firewall_rule` | Add firewall rule |
-| `remove_firewall_rule` | Remove firewall rule |
 | `configure_interface` | Configure interface |
 | `backup_config` | Backup device config |
-| `restore_config` | Restore config |
 
-### Patching Module (`patching`)
+### Patching Module
 | Action | Description |
 |--------|-------------|
-| `scan_updates` | Scan for available updates |
+| `scan_updates` | Scan for updates |
 | `install_updates` | Install updates |
 | `patch_server` | Full patching workflow |
-| `patch_group` | Patch server group |
-| `reboot_server` | Reboot server |
 | `rollback_patch` | Rollback patch |
 
-### Backup Module (`backup`)
+### Backup Module
 | Action | Description |
 |--------|-------------|
 | `list_backup_jobs` | List backup jobs |
-| `get_backup_status` | Get backup status |
-| `validate_backup` | Validate backup integrity |
-| `run_recovery_test` | Run recovery test |
-| `check_backup_compliance` | Check compliance |
-| `generate_backup_report` | Generate report |
+| `validate_backup` | Validate integrity |
+| `run_recovery_test` | Test recovery |
+| `check_compliance` | Check compliance |
 
-### Capacity Module (`capacity`)
+### Capacity Module
 | Action | Description |
 |--------|-------------|
-| `get_current_capacity` | Get current utilization |
-| `get_capacity_trend` | Get historical trend |
-| `forecast_capacity` | Forecast future usage |
-| `check_thresholds` | Check against thresholds |
+| `get_current_capacity` | Get utilization |
+| `forecast_capacity` | Forecast usage |
 | `get_recommendations` | Get recommendations |
-| `analyze_vm_rightsizing` | Find oversized VMs |
 
-### Remediation Module (`remediation`)
+### Remediation Module
 | Action | Description |
 |--------|-------------|
-| `restart_service` | Restart a service |
-| `restart_vm` | Restart VM |
+| `restart_service` | Restart service |
 | `failover_service` | Failover to standby |
-| `reroute_traffic` | Reroute traffic |
-| `scale_service` | Scale service up/down |
-| `execute_runbook` | Execute runbook |
+| `execute_runbook` | Run automation |
 | `create_incident` | Create incident |
-| `list_incidents` | List incidents |
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for the detailed enhancement roadmap including:
+- AI-powered recommendations
+- Multi-tenancy support
+- High availability clustering
+- Enhanced security features
+- Terraform/Ansible integration
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
+3. Make changes and add tests
 4. Run tests: `pytest`
 5. Submit a pull request
 
