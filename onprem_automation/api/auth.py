@@ -22,6 +22,13 @@ try:
     FASTAPI_AVAILABLE = True
 except ImportError:
     FASTAPI_AVAILABLE = False
+    # Mock types for when FastAPI is not available
+    HTTPException = Exception
+    Security = lambda x: None
+    Depends = lambda x: None
+    HTTPBearer = None
+    HTTPAuthorizationCredentials = type(None)
+    APIKeyHeader = None
 
 try:
     import jwt
@@ -41,6 +48,9 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "7")
 if FASTAPI_AVAILABLE:
     bearer_scheme = HTTPBearer(auto_error=False)
     api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+else:
+    bearer_scheme = None
+    api_key_header = None
 
 
 def create_access_token(

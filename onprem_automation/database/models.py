@@ -21,10 +21,59 @@ try:
     SQLALCHEMY_AVAILABLE = True
 except ImportError:
     SQLALCHEMY_AVAILABLE = False
-    # Create mock base for when SQLAlchemy is not available
+
+    # Create mock implementations for when SQLAlchemy is not available
     class MockBase:
+        metadata = None
         pass
-    declarative_base = lambda: MockBase
+
+    def declarative_base():
+        return MockBase
+
+    # Mock column types
+    def Column(*args, **kwargs):
+        return None
+
+    def String(length=None):
+        return None
+
+    def Integer():
+        return None
+
+    def Float():
+        return None
+
+    def Boolean():
+        return None
+
+    def DateTime():
+        return None
+
+    def Text():
+        return None
+
+    def ForeignKey(name):
+        return None
+
+    def Table(*args, **kwargs):
+        return None
+
+    def JSON():
+        return None
+
+    def SQLEnum(*args, **kwargs):
+        return None
+
+    def Index(*args, **kwargs):
+        return None
+
+    def UniqueConstraint(*args, **kwargs):
+        return None
+
+    def relationship(*args, **kwargs):
+        return None
+
+    UUID = None
 
 
 Base = declarative_base()
@@ -89,6 +138,9 @@ if SQLALCHEMY_AVAILABLE:
         Column('role_id', String(36), ForeignKey('roles.id')),
         Column('permission_id', String(36), ForeignKey('permissions.id'))
     )
+else:
+    user_roles = None
+    role_permissions = None
 
 
 # ==================== User & Auth Models ====================

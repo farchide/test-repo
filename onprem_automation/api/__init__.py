@@ -9,11 +9,12 @@ Provides FastAPI-based REST API with:
 """
 
 from .main import create_app, app
-from .auth import get_current_user, require_permission
+from .auth import get_current_user, require_permission, create_access_token
 
 __all__ = [
     "create_app",
     "app",
     "get_current_user",
     "require_permission",
+    "create_access_token",
 ]
